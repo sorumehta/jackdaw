@@ -322,6 +322,11 @@
   ([kgroupedstream window]
    (p/windowed-by-session kgroupedstream window)))
 
+(defn window-sliding-by-time
+  "Windows the KStream using sliding windows."
+  ([kgroupedstream window-size grace-period]
+   (p/windowed-sliding-by-time kgroupedstream window-size grace-period)))
+
 (defn kgroupedstream*
   "Returns the underlying KGroupedStream object."
   ([kgroupedstream]

@@ -21,7 +21,7 @@
             KeyValueMapper Materialized Merger Predicate Printed Produced
             Reducer SessionWindowedKStream SessionWindows
             Suppressed Suppressed$BufferConfig TimeWindowedKStream ValueJoiner
-            ValueMapper ValueTransformerSupplier Windows ForeachAction TransformerSupplier]
+            ValueMapper ValueTransformerSupplier Windows ForeachAction TransformerSupplier SlidingWindows]
            [org.apache.kafka.streams.processor.api
             ProcessorSupplier]
            [org.apache.kafka.streams.state Stores]))
@@ -135,7 +135,7 @@
                      key-serde
                      value-serde))
     builder)
-  
+
   (streams-builder*
     [_]
     streams-builder))
@@ -297,8 +297,8 @@
   (merge
     [_ other-kstream]
     (clj-kstream
-      (.merge kstream
-              ^KStream (kstream* other-kstream))))
+     (.merge kstream
+             ^KStream (kstream* other-kstream))))
 
   (outer-join-windowed
     [_ other-kstream value-joiner-fn windows]
@@ -412,10 +412,10 @@
   (join
     [_ other-ktable foreign-key-extractor-fn value-joiner-fn]
     (clj-ktable
-      (.join ^KTable ktable
-             ^KTable (ktable* other-ktable)
-             ^Function (foreign-key-extractor foreign-key-extractor-fn)
-             ^ValueJoiner (value-joiner value-joiner-fn))))
+     (.join ^KTable ktable
+            ^KTable (ktable* other-ktable)
+            ^Function (foreign-key-extractor foreign-key-extractor-fn)
+            ^ValueJoiner (value-joiner value-joiner-fn))))
 
   (left-join
     [_ other-ktable value-joiner-fn]
@@ -464,7 +464,7 @@
   (suppress
     [_ suppress-config]
     (clj-ktable
-       (.suppress ^KTable ktable (suppress-config->suppressed suppress-config))))
+     (.suppress ^KTable ktable (suppress-config->suppressed suppress-config))))
 
   (to-kstream
     [_]
@@ -602,6 +602,12 @@
     [_ windows]
     (clj-session-windowed-kstream
      (.windowedBy ^KGroupedStream kgroupedstream ^SessionWindows windows)))
+
+  (windowed-sliding-by-time
+    [_ window-size grace-period]
+    (let [time-windowed-stream (.windowedBy ^KGroupedStream kgroupedstream
+                                            (SlidingWindows/withTimeDifferenceAndGrace window-size grace-period))]
+      (clj-time-windowed-kstream time-windowed-stream)))
 
   (kgroupedstream*
     [_]
