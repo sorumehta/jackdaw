@@ -603,11 +603,10 @@
     (clj-session-windowed-kstream
      (.windowedBy ^KGroupedStream kgroupedstream ^SessionWindows windows)))
 
-  (windowed-sliding-by-time
-    [_ window-size grace-period]
-    (let [time-windowed-stream (.windowedBy ^KGroupedStream kgroupedstream
-                                            (SlidingWindows/withTimeDifferenceAndGrace window-size grace-period))]
-      (clj-time-windowed-kstream time-windowed-stream)))
+  (sliding-window-by-time
+    [_ windows]
+    (clj-time-windowed-kstream
+     (.windowedBy ^KGroupedStream kgroupedstream ^SlidingWindows windows)))
 
   (kgroupedstream*
     [_]

@@ -14,7 +14,7 @@
   (:import [java.time Duration]
            [org.apache.kafka.streams.kstream
             JoinWindows SessionWindows TimeWindows Transformer
-            ValueTransformer]
+            ValueTransformer SlidingWindows]
            org.apache.kafka.streams.StreamsBuilder
            [org.apache.kafka.common.serialization Serdes]))
 
@@ -1118,6 +1118,34 @@
         (is (= ["a" 1] (first keyvals)))
         (is (= ["a" 3] (second keyvals)))
         (is (= ["a" 4] (nth keyvals 2))))))
+  
+  (testing "sliding-window-by-time"
+    (let [topic-a (mock/topic "topic-a")
+          topic-b (mock/topic "topic-b")
+          driver (mock/build-driver (fn [builder]
+                                      (-> builder
+                                          (k/kstream topic-a)
+                                          (k/group-by (fn [[k _v]] (long (/ k 10))) topic-a)
+                                          (k/sliding-window-by-time (SlidingWindows/withTimeDifferenceAndGrace
+                                                                     (Duration/ofMillis 1000)
+                                                                     (Duration/ofMillis 100)))
+                                          (k/reduce + topic-a)
+                                          (k/to-kstream)
+                                          (k/map (fn [[k v]] [(.key k) v]))
+                                          (k/to topic-b))))
+          publish (partial mock/publish driver topic-a)]
+  
+      (publish 1000 1 1)
+      (publish 1500 1 2)
+      (publish 1900 1 3)
+      (publish 2100 1 4)
+  
+      (let [keyvals (mock/get-keyvals driver topic-b)]
+        (is (= 4 (count keyvals)))
+        (is (= [0 1] (first keyvals)))
+        (is (= [0 3] (second keyvals)))
+        (is (= [0 6] (nth keyvals 2)))
+        (is (= [0 9] (nth keyvals 3))))))
 
   (testing "windowed-by-session: reduce"
     (let [topic-a (mock/topic "topic-a")
