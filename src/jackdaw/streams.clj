@@ -324,8 +324,14 @@
 
 (defn sliding-window-by-time
   "Windows the KStream using a sliding window"
-  ([kgroupedstream window]
-   (p/sliding-window-by-time kgroupedstream window)))
+  ([kgroupedstream window topic-config]
+   (-> kgroupedstream
+       (p/sliding-window-by-time window)
+       (aggregate (fn [] 0)
+                  (fn [aggr [_k v]] (+ aggr v))  ; Extract the value from [k v]
+                  (assoc topic-config :topic-name "sliding-window-store"))
+       (suppress {:until-time-limit-ms  (.timeDifferenceMs window)})
+       (to-kstream))))
 
 (defn kgroupedstream*
   "Returns the underlying KGroupedStream object."

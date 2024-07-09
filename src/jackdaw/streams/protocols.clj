@@ -253,7 +253,9 @@
 
   (windowed-by-session [kgroupedstream window])
 
-  (sliding-window-by-time [kgroupedstream window])
+  (sliding-window-by-time
+    [kgroupedstream window]
+    "Windows the KGroupedStream using a sliding time window.")
 
   (kgroupedstream*
     [kgroupedstream]
