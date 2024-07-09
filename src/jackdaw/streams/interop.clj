@@ -297,8 +297,8 @@
   (merge
     [_ other-kstream]
     (clj-kstream
-     (.merge kstream
-             ^KStream (kstream* other-kstream))))
+      (.merge kstream
+              ^KStream (kstream* other-kstream))))
 
   (outer-join-windowed
     [_ other-kstream value-joiner-fn windows]
@@ -412,10 +412,10 @@
   (join
     [_ other-ktable foreign-key-extractor-fn value-joiner-fn]
     (clj-ktable
-     (.join ^KTable ktable
-            ^KTable (ktable* other-ktable)
-            ^Function (foreign-key-extractor foreign-key-extractor-fn)
-            ^ValueJoiner (value-joiner value-joiner-fn))))
+      (.join ^KTable ktable
+             ^KTable (ktable* other-ktable)
+             ^Function (foreign-key-extractor foreign-key-extractor-fn)
+             ^ValueJoiner (value-joiner value-joiner-fn))))
 
   (left-join
     [_ other-ktable value-joiner-fn]
@@ -464,7 +464,7 @@
   (suppress
     [_ suppress-config]
     (clj-ktable
-     (.suppress ^KTable ktable (suppress-config->suppressed suppress-config))))
+       (.suppress ^KTable ktable (suppress-config->suppressed suppress-config))))
 
   (to-kstream
     [_]
