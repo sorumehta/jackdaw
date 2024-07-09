@@ -324,13 +324,15 @@
 
 (defn sliding-window-by-time
   "Windows the KStream using a sliding window"
-  ([kgroupedstream window topic-config]
+  ([kgroupedstream window topic-config] ; default aggregation (sum)
+   (sliding-window-by-time kgroupedstream window topic-config (fn [] 0) (fn [aggr [_k v]] (+ aggr v))))
+  ([kgroupedstream window topic-config initializer-fn aggregator-fn]
    (-> kgroupedstream
        (p/sliding-window-by-time window)
-       (aggregate (fn [] 0)
-                  (fn [aggr [_k v]] (+ aggr v))  ; Extract the value from [k v]
+       (aggregate initializer-fn
+                  aggregator-fn
                   (assoc topic-config :topic-name "sliding-window-store"))
-       (suppress {:until-time-limit-ms  (.timeDifferenceMs window)})
+       (suppress {:until-time-limit-ms (.timeDifferenceMs window)})
        (to-kstream))))
 
 (defn kgroupedstream*
