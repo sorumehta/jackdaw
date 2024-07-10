@@ -332,7 +332,7 @@
        (aggregate initializer-fn
                   aggregator-fn
                   (assoc topic-config :topic-name "sliding-window-store"))
-       (suppress {:until-time-limit-ms (.timeDifferenceMs window)})
+       (suppress {})
        (to-kstream))))
 
 (defn kgroupedstream*
